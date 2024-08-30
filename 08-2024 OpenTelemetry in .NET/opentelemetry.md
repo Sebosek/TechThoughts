@@ -3,33 +3,33 @@
 The OpenTelemetry website defines the OpenTelemetry as:
 > OpenTelemetry is a collection of APIs, SDKs, and tools. Use it to instrument, generate, collect, and export telemetry data (metrics, logs, and traces) to help you analyze your software’s performance and behavior.
 
-That's actually quite precise summary, but maybe a bit technical, so let me rephrase what the OpenTelemetry is. The OpenTelemetry is an abstraction for metrics, logs, and traces. With the OpenTelemetry we are abstracted from a need to install any vendor specific agent or SDK that would limit us in what it is capable to collect. As we are abstracted on a vendor specific collector, we are also abstracted from observability system like Datadog, Elastic Observability, Azure Monitor/Application Insights. In other words, thanks to the OpenTelemetry we are vendor free and we can switch between vendors based on current limitations, price, or simple our needs and preferences.
+That's actually quite a precise summary, but maybe a bit technical, so let me rephrase what the OpenTelemetry is in my words. The OpenTelemetry is an abstraction for metrics, logs, and traces. With the OpenTelemetry we are abstracted from a need to install any vendor-specific agent or SDK that would limit us in what it is capable of collecting. As we are abstracted on a vendor-specific collector, we are also abstracted from observability systems like Datadog, Elastic Observability, and Azure Monitor/Application Insights. In other words, thanks to OpenTelemetry we are vendor-free and we can switch between vendors based on current limitations, price, or simply our needs and preferences.
 
 ---
 
-The OpenTelemetry is made by language specific SDK that collects application metrics like logs, traces and metrices. The SDK sends these data to a collector using OTLP protocol. The collector may be a vendor specific collector that is part of observability solution like Elastic APM, or the collector may be the OpenTelemetry Collector. The second named is our main are of interest.
+The OpenTelemetry is made by a language-specific SDK that collects application metrics like logs, traces and metrics. The SDK sends these data to a collector using the OTLP protocol. The collector may be a vendor-specific collector that is part of an observability solution like Elastic APM, or the collector may be the OpenTelemetry Collector. The OpenTelemetry Collector is our main area of interest.
 
 ![The OpenTelemetry diagram](./assets/otel-diagram.svg "The OpenTelemetry diagram")
 
-The OpenTelemetry Collector is a running deamon that is highly configurable and made by three main parts.
+The OpenTelemetry Collector is a running daemon that is highly configurable and made of three main parts.
 
 1. Receivers
 2. Exporters
 3. Processors
 
 ## Receivers
-The Receiver is a component that is able to collect or receive signals. The OpenTelemetry offers a long list of receivers containing receivers able to collect host metrics, NGINX logs, RabbitMQ logs, Datadog Agent and among others also the OTLP.
+The Receiver is a component that can collect or receive signals. OpenTelemetry offers a long list of receivers containing receivers that can collect host metrics, NGINX logs, RabbitMQ logs, Datadog Agent and among other things also the OTLP.
 
 ## Exporters
-The Exporter is in direct opposite to a receiver. The Exporter is responsible for exporting signals down in pipeline. The target may be a storage like ElasticSearch or a Sender that just pipes signals. In the following examples we use OTLP exporter what forwards signals to OTLP collector.
+The Exporter is in direct opposition to the receiver. The Exporter is responsible for exporting signals down in the pipeline. The target may be a storage like ElasticSearch or a Sender that pipes signals down in the line. In the following examples, we use an OTLP exporter that forwards signals to yet another OTLP collector.
 
 ## Processors
-The Processor takes a data from receivers and tranform, filter, drop, rename or even recalculate signals before sends them to the exporters. Typical processors are `batch` and `memory_limiter`.
+The Processor takes data from receivers and transforms, filters, drops, renames or even recalculates signals before sending them to the exporters. Typical and the most often used processors are `batch` and `memory_limiter`.
 
-## Run the OpenTelemetry Collector
-The sample is made by an application that is the telemetry producer and uses OpenTelemetry SDK to send the telemetry signals to the OpenTelemetry Collector which forward the to the Aspire for data visualization.
+## Run OpenTelemetry Collector
+The sample used here is made by an application that is the telemetry producer with installed OpenTelemetry SDK to send the telemetry signals to the OpenTelemetry Collector which forwards them to the Aspire for data visualization.
 
-The configuration for such sample is the following.
+The configuration for such a sample follows.
 
 ```yaml
 receivers:
@@ -73,7 +73,7 @@ service:
 
 ```
 
-I run the OpenTelemetry Collector in the Docker. To see the data I use for local development the Aspire, so let's prepare a docker compose file with OpenTelemetry Collector and Aspire.
+I run the OpenTelemetry Collector in the Docker. To see the data I use for local development the Aspire. Let's prepare a docker-compose file with OpenTelemetry Collector and Aspire.
 
 ```yaml
 version: '3.8'
@@ -101,7 +101,7 @@ services:
 ```
 
 ### .NET ecosystem
-First of all install `OpenTelemetry.Exporter.OpenTelemetryProtocol`, `OpenTelemetry.Extensions.Hosting`, `OpenTelemetry.Instrumentation.Http`, `OpenTelemetry.Instrumentation.Runtime` NuGet packages. Please notice how the packages are named, so simply based on name you know what the package offeres. Every OpenTelemetry SDK supports **code-based** or **zero-code** configuration. In the sample I use the code-based configuration.
+First of all install `OpenTelemetry.Exporter.OpenTelemetryProtocol`, `OpenTelemetry.Extensions.Hosting`, `OpenTelemetry.Instrumentation.Http`, `OpenTelemetry.Instrumentation.Runtime` NuGet packages. Please notice how the packages are named. Simply based on name you already know what the package offers. Every OpenTelemetry SDK supports **code-based** or **zero-code** configuration. In the sample, I use the code-based configuration.
 
 In the `program.cs` add the OpenTelemetry setup.
 
@@ -159,12 +159,12 @@ builder.Services
     });
 ```
 
-That's the bare minimum required to have OpenTelemetry in .NET application.
+That's the bare minimum required to have OpenTelemetry in a .NET application.
 
 #### ActivitySource
-The `ActivitySource` comes from the `System.Diagnostics.Activity` which from .NET 5 part of the framework. The concept of the `ActivitySource` is equal to the `Trace` in OpenTelemetry. It's basically a component responsible for creating `Activity` which is an equavalent to the `Span`. The `Activity` tracks the application behaviour.
+The `ActivitySource` comes from the `System.Diagnostics.Activity` from the .NET 5 framework. The concept of the `ActivitySource` is equal to the `Trace` in OpenTelemetry. It's basically a component responsible for creating `Activity` that is equivalent to the OpenTelemetry `Span`. The `Activity` tracks the application behaviour.
 
-It's recommanded to have a single `ActivitySource` per library or create another one, if you expect that you or somebody else may want turn on or off telemetry sources independently. The `source` of activity must be unique and the `version` is optional parameter, but recommanded to use.
+It's recommended to have a single `ActivitySource` per library or create another one if you expect that you or somebody else may want to turn on or off telemetry sources independently. The `source` of the activity must be unique and the `version` is an optional parameter, but recommended to use.
 
 ```csharp
 public static class AppActivitySource
@@ -175,7 +175,7 @@ public static class AppActivitySource
 }
 ```
 
-The activity you simple create with `StartActivity()` withing the `using` block that makes the `Activity` boundry. Be aware that `StartActivity()` may return `null` value instead of object if there are no listeners for the `ActivitySource`. You can also attach a tag to the activity by using `activity.SetTag(AppTags.MyTag, value)`.
+The activity you simply create with `StartActivity()` within the `using` block that makes the `Activity` boundary. Be aware that `StartActivity()` may return a `null` value instead of an object if there are no listeners for the `ActivitySource`. You can also attach a tag to the activity by using `activity.SetTag(AppTags.MyTag, value)`.
 
 Every `ActivitySource` **must be registered** in the OpenTelemetry tracing configuration by its name.
 
@@ -192,7 +192,7 @@ builder.Services
 ```
 
 #### Create custom metrics
-To create a custom metrics you just need to create a class that uses `IMeterFactory` to create meter to record counter, up-down counter or histogram values.
+To create custom metrics you just need to create a class that uses `IMeterFactory` to create a meter to record counter, up-down counter or histogram values.
 
 ```csharp
 // Register in the DI as singleton
@@ -217,7 +217,7 @@ public class SampleMetrics
 }
 ```
 
-Finally, similarly to the `ActivitySource`, we have to register meter namespace to be able to reach them to the collector.
+Finally, similarly to the `ActivitySource`, we have to register the meter namespace to be able to reach them to the collector.
 
 ```csharp
 builder.Services
@@ -235,7 +235,7 @@ builder.Services
 ```
 
 #### Serilog
-The Serilog is one of the most well known and used libraries in the .NET ecosystem. Depending on how you use the Serilog you may end up with not able to see logs in Dashboard. The configuration what I am using is the following.
+The Serilog is one of the most well-known and used libraries in the .NET ecosystem. Depending on how you use the Serilog you may end up being unable to see logs in the Dashboard. The configuration that I am using is the following.
 
 ```csharp
 // Create the Serilog configuration
@@ -264,9 +264,9 @@ builder.Services.AddSerilog(serilog.CreateLogger());
 ```
 
 ### Exporters
-In the sample we used Aspire for local development, which is great and give us developers the overview that we need before we push the app to the production, but what about the production environment? Thanks to the OpenTelemetry abstraction we can use any Observability provider out there, it's simple as literally the single change in configuration that allow you to use production-ready solution like OneUptime.
+In the sample I've used Aspire for local development, which is great and gives us developers the overview that we need before we push the app to the production, but what about the production environment? Thanks to the OpenTelemetry abstraction we can use any Observability provider out there, it's simple as literally the single change in configuration that allow you to use production-ready solution like [OneUptime](https://oneuptime.com/).
 
-Here is the configuration for OneUptime.
+Here is the configuration for [OneUptime](https://oneuptime.com/).
 
 ```yaml
 receivers:
@@ -284,7 +284,7 @@ exporters:
   # Exportet over HTTP
   otlphttp:
     endpoint: "https://oneuptime.com/otlp"
-    # Requires use JSON encoder over default Proto(buf)
+    # Requires use JSON encoder insted of default Proto(buf)
     encoding: json
     headers: 
       "Content-Type": "application/json"
