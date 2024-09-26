@@ -330,6 +330,10 @@ builder.Services
     });
 ```
 
+The authorization flow is different to the client credentials flow and it involves multiple hops we also need new endpoint. The flow itself is captured in the diagram bellow. The image is taken from [Okta docs](https://developer.okta.com/docs/guides/implement-grant-type/authcode/main/), so instead of Okta imagine our Identity provider.
+
+![Authorization flow diagram](./assets/auth-code-flow-diagram.png "Authorization flow diagram")
+
 ```csharp
 app.MapGet("/connect/authorize", async (HttpContext context) =>
     {
@@ -364,6 +368,9 @@ app.MapGet("/connect/authorize", async (HttpContext context) =>
     .ExcludeFromDescription();
 ```
 
+We create also a new client just for authorization code flow, however, you may combine multiple flow together under one client, but always think about possible revocation and how effect it would have on your users.
+In our case we use public client, that's the client for public use, typically a SPA application and does not require a secret, but the PKCE is in some implementations required on server, client, or both sides.
+
 ```csharp
 private static async Task SeedAuthClientAsync(IOpenIddictApplicationManager manager, CancellationToken cancellationToken)
 {
@@ -396,6 +403,8 @@ private static async Task SeedAuthClientAsync(IOpenIddictApplicationManager mana
 }
 ```
 
+We also muse extend existing `token` endpoint to able assign access token.
+
 ```csharp
 if (request.IsAuthorizationCodeGrantType())
 {
@@ -405,10 +414,10 @@ if (request.IsAuthorizationCodeGrantType())
 }
 ```
 
-To get the the IdToken and refresh token in response use the following scopes `openid offline_access`.
+To get the `IdToken` token in response you must specify the `openid` scope.
 
 ## Swagger authentication
-We can improve the DX in swagger.
+We can improve the DX in swagger to make the whole authorization flow inside the SwaggerUI. However, such change requires an `implicit` grant type client that should not be used for new application, because its broken beyond repair and all the new apps should use oly the authorization code with PCKE (Proof of Key Code Exchange).
 
 ```csharp
 private static async Task SeedSwaggerClientAsync(IOpenIddictApplicationManager manager, CancellationToken cancellationToken)
@@ -439,6 +448,8 @@ private static async Task SeedSwaggerClientAsync(IOpenIddictApplicationManager m
     }, cancellationToken);
 }
 ```
+
+We must also modify the Swagger get configuration.
 
 ```csharp
 builder.Services.AddSwaggerGen(options =>
@@ -477,6 +488,8 @@ builder.Services.AddSwaggerGen(options =>
 });
 ```
 
+We need provide the client configuration into the Swagger UI.
+
 ```csharp
 app.UseSwagger();
     app.UseSwaggerUI(options =>
@@ -488,6 +501,8 @@ app.UseSwagger();
     });
 ```
 
+And don't forget to enable implicit flow in the OpenIddict.
+
 ```csharp
 builder.Services
     .AddOpenIddict()
@@ -498,9 +513,13 @@ builder.Services
     });
 ```
 
+The final and desired DX.
+
+![Swagger OIDC](./assets/swagger-auth-oidc.png "Swagger OIDC")
+
 ## Refresh token
 
-To get the refresh token in response you must request the `offline_access` scope.
+To get the refresh token in response you must request the `offline_access` scope and extend the `token` endpoint.
 
 ```csharp
 if (request.IsRefreshTokenGrantType())
@@ -513,9 +532,13 @@ if (request.IsRefreshTokenGrantType())
 
 ## Final thoughts
 
-That's it.
+Authentication, Authorization, and User identity, or overall user security are extremely hard. Before you even start thinking about an Identity provider, analyze if you really need an Identity provider, wouldn't there be more lightway solutions which would be a better fix to your problem? Maybe the Cookies-based authentication is sufficient, or maybe the ASP.NET Identity with bearer tokens would suit your needs better.
+User security is not only login page but also resetting password flow, blocking users, deleting users, getting GDPR-related data out of your system and many more cases that you **must** nowadays fulfil.
+If you still decide to go with an identity provider, before you start building on your Identity provider, consider the **costs of building and maintaining your solution** versus **using existing services** like Auth0, Okna, Microsoft EntryID or Keycloak. 
+
+That's it, keep codes going and see you later.
 
 ---
 
-August, 2024 <br />
+September, 2024 <br />
 [Sebastian](mailto:ja@sebastianbusek.cz) <br />
